@@ -1,0 +1,7 @@
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.trash/
+
+# asset-manager app
+node_modules/
+data/

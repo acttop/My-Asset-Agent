@@ -1,0 +1,16 @@
+{
+  "name": "asset-manager",
+  "version": "0.1.0",
+  "private": true,
+  "description": "개인용 로컬 자산관리 앱",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "node --watch server/index.js",
+    "start": "node server/index.js",
+    "backup": "node scripts/backup.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
