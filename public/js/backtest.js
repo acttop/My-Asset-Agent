@@ -62,7 +62,11 @@ const state = {
 export async function renderBacktest(container) {
   container.innerHTML = `<p class="text-slate-500">불러오는 중...</p>`;
   try {
-    const [portfolios, accounts] = await Promise.all([api.getBacktestPortfolios(), api.getAccounts()]);
+    const [portfolios, accounts, tickerMeta] = await Promise.all([
+      api.getBacktestPortfolios(),
+      api.getAccounts(),
+      api.getTickerMeta().catch(() => ({})),
+    ]);
     container.innerHTML = `
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div>
@@ -236,7 +240,7 @@ export async function renderBacktest(container) {
     `;
 
     renderRows(container);
-    wireEvents(container, portfolios, accounts);
+    wireEvents(container, portfolios, accounts, tickerMeta);
   } catch (err) {
     container.innerHTML = `<p class="text-red-600">불러오기 실패: ${err.message}</p>`;
   }
@@ -382,7 +386,7 @@ function wireTickerSearch(container) {
   });
 }
 
-function wireEvents(container, portfolios, accounts) {
+function wireEvents(container, portfolios, accounts, tickerMeta) {
   wireTickerSearch(container);
 
   container.querySelector('#bt-import-holdings').addEventListener('click', async () => {
@@ -445,7 +449,11 @@ function wireEvents(container, portfolios, accounts) {
   container.querySelectorAll('.bt-preset').forEach((btn) =>
     btn.addEventListener('click', () => {
       const preset = PRESETS[Number(btn.dataset.preset)];
-      state.rows = preset.allocations.map((a) => ({ ticker: a.ticker, weight: a.weight * 100, name: null }));
+      state.rows = preset.allocations.map((a) => ({
+        ticker: a.ticker,
+        weight: a.weight * 100,
+        name: tickerMeta[a.ticker]?.name || null,
+      }));
       state.portfolioName = preset.name;
       state.editingPortfolioId = null;
       renderBacktest(container);
@@ -470,7 +478,11 @@ function wireEvents(container, portfolios, accounts) {
       if (!p) return;
       state.editingPortfolioId = p.id;
       state.portfolioName = p.name;
-      state.rows = p.allocations.map((a) => ({ ticker: a.ticker, weight: a.weight * 100, name: null }));
+      state.rows = p.allocations.map((a) => ({
+        ticker: a.ticker,
+        weight: a.weight * 100,
+        name: tickerMeta[a.ticker]?.name || null,
+      }));
       renderBacktest(container);
     })
   );
