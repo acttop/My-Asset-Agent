@@ -13,7 +13,10 @@ router.get(
   '/cumulative',
   asyncHandler(async (req, res) => {
     const events = await listEvents();
-    const series = await computeGrowthSeries(events, { accountId: req.query.accountId });
+    const series = await computeGrowthSeries(events, {
+      accountId: req.query.accountId,
+      granularity: req.query.granularity,
+    });
     const cumulative = series.map((p) => ({
       date: p.date,
       returnRate: p.contributions > 0 ? (p.value - p.contributions) / p.contributions : null,

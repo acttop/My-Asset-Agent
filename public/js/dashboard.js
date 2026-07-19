@@ -5,7 +5,9 @@ import { renderMarketTicker } from './marketTicker.js';
 import { renderAccountTabs, bindAccountTabs } from './accountTabs.js';
 
 const ALLOC_LABELS = { account: '계좌별', type: '유형별', ticker: '종목별' };
+const GRANULARITY_LABELS = { day: '일', week: '주', month: '월' };
 let selectedAccountId = null;
+let cumulativeGranularity = 'month';
 
 export async function renderDashboard(container) {
   container.innerHTML = `<p class="text-slate-500">불러오는 중...</p>`;
@@ -33,8 +35,11 @@ export async function renderDashboard(container) {
           <div class="text-sm text-slate-500">📊 수익률 차트</div>
           <div id="returns-chart-tabs"></div>
         </div>
-        <div class="text-xs text-slate-400 mb-1">📈 누적 수익률</div>
-        <canvas id="chart-cumulative" height="60"></canvas>
+        <div class="flex items-center justify-between mb-1">
+          <div class="text-xs text-slate-400">📈 누적 수익률</div>
+          <div id="cumulative-granularity-tabs" class="flex gap-1"></div>
+        </div>
+        <div id="chart-cumulative-wrap"><canvas id="chart-cumulative" height="60"></canvas></div>
         <div class="text-xs text-slate-400 mb-1 mt-5">📊 월별 수익률</div>
         <canvas id="chart-monthly" height="60"></canvas>
       </div>
@@ -173,8 +178,29 @@ async function renderGrowthChart(container) {
   }
 }
 
+function renderGranularityTabs(container) {
+  const tabsEl = container.querySelector('#cumulative-granularity-tabs');
+  tabsEl.innerHTML = Object.entries(GRANULARITY_LABELS)
+    .map(
+      ([key, label]) =>
+        `<button data-granularity="${key}" class="granularity-tab px-2 py-0.5 text-xs rounded-full ${
+          cumulativeGranularity === key ? 'bg-blue-600 text-white' : 'bg-white border'
+        }">${label}</button>`
+    )
+    .join('');
+  tabsEl.querySelectorAll('.granularity-tab').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      cumulativeGranularity = btn.dataset.granularity;
+      renderCumulativeChart(container);
+    });
+  });
+}
+
 async function renderCumulativeChart(container) {
-  const cumulative = await api.getReturnsCumulative(selectedAccountId).catch(() => []);
+  renderGranularityTabs(container);
+  const wrap = container.querySelector('#chart-cumulative-wrap');
+  wrap.innerHTML = `<canvas id="chart-cumulative" height="60"></canvas>`;
+  const cumulative = await api.getReturnsCumulative(selectedAccountId, cumulativeGranularity).catch(() => []);
   if (cumulative.length > 0) {
     renderLineChart('chart-cumulative', {
       labels: cumulative.map((p) => p.date),

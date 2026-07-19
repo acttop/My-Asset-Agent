@@ -39,8 +39,13 @@ export const api = {
     request(`/dashboard/growth${accountId ? `?accountId=${accountId}` : ''}`),
   getDashboardAllocation: (by, accountId) =>
     request(`/dashboard/allocation?by=${by}${accountId ? `&accountId=${accountId}` : ''}`),
-  getReturnsCumulative: (accountId) =>
-    request(`/returns/cumulative${accountId ? `?accountId=${accountId}` : ''}`),
+  getReturnsCumulative: (accountId, granularity) => {
+    const params = new URLSearchParams();
+    if (accountId) params.set('accountId', accountId);
+    if (granularity) params.set('granularity', granularity);
+    const qs = params.toString();
+    return request(`/returns/cumulative${qs ? `?${qs}` : ''}`);
+  },
   getReturnsMonthly: (accountId) =>
     request(`/returns/monthly${accountId ? `?accountId=${accountId}` : ''}`),
   getReturnsByAccount: () => request('/returns/by-account'),

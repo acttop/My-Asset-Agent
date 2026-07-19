@@ -30,8 +30,31 @@ export function monthEndDates(startDate, endDate) {
   return dates;
 }
 
-// 이벤트 리플레이 + 과거 시세로 월말 기준 평가금액/누적납입금 시계열을 재구성한다.
-export async function computeGrowthSeries(events, { accountId } = {}) {
+// startDate부터 stepDays 간격으로 날짜를 찍고, 마지막은 항상 endDate로 맞춘다.
+function stepDates(startDate, endDate, stepDays) {
+  const dates = [];
+  let cursor = new Date(startDate);
+  while (cursor < endDate) {
+    dates.push(new Date(cursor));
+    cursor = new Date(cursor);
+    cursor.setDate(cursor.getDate() + stepDays);
+  }
+  dates.push(new Date(endDate));
+  return dates;
+}
+
+export function dailyDates(startDate, endDate) {
+  return stepDates(startDate, endDate, 1);
+}
+
+export function weeklyDates(startDate, endDate) {
+  return stepDates(startDate, endDate, 7);
+}
+
+const GRANULARITY_DATES = { day: dailyDates, week: weeklyDates, month: monthEndDates };
+
+// 이벤트 리플레이 + 과거 시세로 지정한 간격(일/주/월) 기준 평가금액/누적납입금 시계열을 재구성한다.
+export async function computeGrowthSeries(events, { accountId, granularity = 'month' } = {}) {
   const scoped = accountId ? events.filter((e) => e.accountId === accountId) : events;
   const tradeEvents = scoped.filter((e) => (e.type === 'buy' || e.type === 'sell') && e.ticker);
   if (tradeEvents.length === 0) return [];
@@ -48,7 +71,8 @@ export async function computeGrowthSeries(events, { accountId } = {}) {
   }
 
   const firstDateStr = tradeEvents.reduce((min, e) => (e.date < min ? e.date : min), tradeEvents[0].date);
-  const dates = monthEndDates(new Date(firstDateStr), new Date());
+  const genDates = GRANULARITY_DATES[granularity] || monthEndDates;
+  const dates = genDates(new Date(firstDateStr), new Date());
 
   const contribEvents = scoped
     .filter((e) => e.type === 'deposit' || e.type === 'withdraw')
