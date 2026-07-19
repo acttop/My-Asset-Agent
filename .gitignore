@@ -4,4 +4,4 @@
 
 # asset-manager app
 node_modules/
-data/
+/data/
