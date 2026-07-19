@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>내 자산관리</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+  <header class="bg-white border-b border-slate-200 px-6 py-4">
+    <h1 class="text-xl font-bold">💰 내 자산관리</h1>
+  </header>
+
+  <nav class="bg-white border-b border-slate-200 px-6 flex gap-1" id="tab-nav">
+    <button data-tab="dashboard" class="tab-btn">📊 대시보드</button>
+    <button data-tab="holdings" class="tab-btn">📈 보유종목</button>
+    <button data-tab="events" class="tab-btn">💰 이벤트 이력</button>
+    <button data-tab="dividends" class="tab-btn">💸 배당</button>
+    <button data-tab="rebalance" class="tab-btn">🎯 리밸런싱</button>
+    <button data-tab="backtest" class="tab-btn">🔬 백테스팅</button>
+    <button data-tab="guide" class="tab-btn">📖 가이드</button>
+  </nav>
+
+  <main class="p-6 max-w-6xl mx-auto">
+    <section id="view-dashboard" class="tab-view"></section>
+    <section id="view-holdings" class="tab-view hidden"></section>
+    <section id="view-events" class="tab-view hidden"></section>
+    <section id="view-dividends" class="tab-view hidden"></section>
+    <section id="view-rebalance" class="tab-view hidden"></section>
+    <section id="view-backtest" class="tab-view hidden"></section>
+    <section id="view-guide" class="tab-view hidden"></section>
+  </main>
+
+  <div id="modal-root"></div>
+
+  <script src="/vendor/chart.umd.min.js"></script>
+  <script src="/vendor/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

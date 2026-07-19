@@ -1,0 +1,7 @@
+.obsidian/
+.trash/
+.claude/settings.local.json
+
+# asset-manager app
+node_modules/
+data/
