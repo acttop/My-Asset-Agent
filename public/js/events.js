@@ -26,6 +26,24 @@ const OUTFLOW_TYPES = new Set(['buy', 'withdraw']);
 // 매수/매도는 수량×단가로, 나머지는 총액으로 입력받는다.
 const QUANTITY_TYPES = new Set(['buy', 'sell']);
 
+// 종목 검색창에 "종목명 (티커)"로 표시된 값에서 종목명만 뽑아낸다. 직접 타이핑만 한 경우엔 그 원문을 그대로 쓴다.
+function getTickerDisplayName(form) {
+  const raw = form.querySelector('#event-ticker-search').value.trim();
+  const match = raw.match(/^(.*) \([^)]+\)$/);
+  return match ? match[1] : raw;
+}
+
+// 매수/매도일 때 종목명·수량·매매단가로 메모를 자동으로 채운다 (예: "TIGER 200 · 15주 × ₩105,210").
+function updateAutoMemo(form) {
+  if (!QUANTITY_TYPES.has(form.type.value)) return;
+  const name = getTickerDisplayName(form);
+  const quantity = form.quantity.value;
+  const price = parseCommaNumber(form.pricePerShare.value);
+  if (!name || !quantity || !price) return;
+  const currency = form.currency.value || 'KRW';
+  form.memo.value = `${name} · ${formatNumber(Number(quantity), 4)}주 × ${formatCurrency(price, currency)}`;
+}
+
 const filters = { type: '', q: '' };
 let editingId = null;
 let sortState = { key: null, dir: 'asc' };
@@ -165,6 +183,7 @@ export async function renderEvents(container) {
           form.ticker.value = ticker;
           form.currency.value = item.dataset.currency || '';
           resultsEl.classList.add('hidden');
+          updateAutoMemo(form);
           statusEl.textContent = '조회 중...';
           statusEl.className = 'text-xs text-slate-400';
           try {
@@ -172,6 +191,7 @@ export async function renderEvents(container) {
             form.currency.value = quote.currency;
             statusEl.textContent = `✓ ${new Intl.NumberFormat('ko-KR').format(quote.price)} ${quote.currency}`;
             statusEl.className = 'text-xs text-emerald-600';
+            updateAutoMemo(form);
           } catch {
             statusEl.textContent = '';
           }
@@ -187,6 +207,7 @@ export async function renderEvents(container) {
       form.ticker.value = '';
       form.currency.value = '';
       statusEl.textContent = '';
+      updateAutoMemo(form);
       clearTimeout(debounceTimer);
       const q = input.value.trim();
       if (!q) {
@@ -215,10 +236,15 @@ export async function renderEvents(container) {
       wireThousandsInput(form.querySelector('#event-amount'));
       wireThousandsInput(form.querySelector('#event-price'));
       wireTickerSearch(form, holdings);
+      form.quantity.addEventListener('input', () => updateAutoMemo(form));
+      form.pricePerShare.addEventListener('input', () => updateAutoMemo(form));
     }
 
     updateFieldVisibility(form);
-    form?.type.addEventListener('change', () => updateFieldVisibility(form));
+    form?.type.addEventListener('change', () => {
+      updateFieldVisibility(form);
+      updateAutoMemo(form);
+    });
 
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -411,7 +437,7 @@ function renderAddForm(accounts) {
       </div>
       <div class="flex-1 min-w-[130px]">
         <label class="block text-xs text-slate-500">일자</label>
-        <input name="date" type="date" class="border rounded px-2 py-1 w-full" required />
+        <input name="date" type="date" value="${new Date().toISOString().slice(0, 10)}" class="border rounded px-2 py-1 w-full" required />
         <div class="text-xs h-4"></div>
       </div>
       <div class="flex-1 min-w-[110px]">
