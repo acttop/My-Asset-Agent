@@ -120,28 +120,27 @@ export async function renderEvents(container) {
     });
   }
 
-  // 선택된 계좌가 보유 중인 종목을 클릭 한 번으로 고를 수 있게 티커 입력창 아래 목록으로 보여준다.
+  // 선택된 계좌가 보유 중인 종목을 드롭다운으로 골라 티커 입력을 채울 수 있게 한다.
   function refreshTickerPills(form, accountId, holdings) {
-    const pillsEl = form.querySelector('#event-ticker-holdings');
-    if (!pillsEl) return;
+    const selectEl = form.querySelector('#event-ticker-select');
+    if (!selectEl) return;
     const accountHoldings = holdings.filter((h) => h.accountId === accountId && !h.isCash && h.ticker);
-    if (accountHoldings.length === 0) {
-      pillsEl.innerHTML = `<span class="text-xs text-slate-400">이 계좌의 보유종목이 없어요</span>`;
-      return;
-    }
-    pillsEl.innerHTML = accountHoldings
-      .map(
-        (h) =>
-          `<button type="button" data-ticker="${escapeHtml(h.ticker)}" data-currency="${escapeHtml(h.priceCurrency || 'KRW')}" class="ticker-pill px-2 py-0.5 text-xs rounded-full border bg-white hover:bg-slate-50">${escapeHtml(h.name)}</button>`
-      )
-      .join('');
-    pillsEl.querySelectorAll('.ticker-pill').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        form.ticker.value = btn.dataset.ticker;
-        form.currency.value = btn.dataset.currency;
-        form.ticker.dispatchEvent(new Event('blur'));
-      });
-    });
+    selectEl.innerHTML =
+      `<option value="">${accountHoldings.length ? '— 보유종목에서 선택 —' : '이 계좌의 보유종목이 없어요'}</option>` +
+      accountHoldings
+        .map(
+          (h) =>
+            `<option value="${escapeHtml(h.ticker)}" data-currency="${escapeHtml(h.priceCurrency || 'KRW')}">${escapeHtml(h.name)}</option>`
+        )
+        .join('');
+    selectEl.onchange = () => {
+      const opt = selectEl.selectedOptions[0];
+      if (!opt?.value) return;
+      form.ticker.value = opt.value;
+      form.currency.value = opt.dataset.currency || '';
+      form.ticker.dispatchEvent(new Event('blur'));
+      selectEl.value = ''; // 다시 선택할 수 있도록 안내 옵션으로 리셋
+    };
   }
 
   function wireAddForm(c, holdings) {
@@ -322,9 +321,9 @@ function renderAddForm(accounts) {
       </div>
       <div class="flex-1 min-w-[160px]">
         <label class="block text-xs text-slate-500">티커(선택)</label>
-        <input name="ticker" id="event-ticker" class="border rounded px-2 py-1 w-full" />
+        <select id="event-ticker-select" class="border rounded px-2 py-1 w-full mb-1 text-sm"></select>
+        <input name="ticker" id="event-ticker" placeholder="티커 직접 입력" class="border rounded px-2 py-1 w-full" />
         <input type="hidden" name="currency" id="event-currency" />
-        <div id="event-ticker-holdings" class="flex flex-wrap gap-1 mt-1"></div>
         <div id="event-ticker-status" class="text-xs h-4"></div>
       </div>
       <div id="field-amount" class="flex-1 min-w-[130px]">
