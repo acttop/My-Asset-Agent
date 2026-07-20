@@ -42,10 +42,11 @@ export async function renderEvents(container) {
     const query = {};
     if (filters.type) query.type = filters.type;
     if (filters.q) query.q = filters.q;
-    const [accounts, events, tickerMeta] = await Promise.all([
+    const [accounts, events, tickerMeta, holdings] = await Promise.all([
       api.getAccounts(),
       api.getEvents(query),
       api.getTickerMeta(),
+      api.getHoldings(),
     ]);
     container.innerHTML = `
       ${renderAddForm(accounts)}
@@ -54,7 +55,7 @@ export async function renderEvents(container) {
     `;
     renderTableSection(container, events, accounts, tickerMeta);
     wireFilters(container);
-    wireAddForm(container);
+    wireAddForm(container, holdings);
   } catch (err) {
     container.innerHTML = `<p class="text-red-600">불러오기 실패: ${err.message}</p>`;
   }
@@ -76,6 +77,7 @@ export async function renderEvents(container) {
         f.type.value = ev.type;
         f.accountId.value = ev.accountId;
         f.ticker.value = ev.ticker || '';
+        refreshTickerPills(f, ev.accountId, holdings);
         f.amount.value = ev.amount;
         f.amount.dispatchEvent(new Event('input')); // 콤마 서식 재적용
         f.quantity.value = ev.quantity ?? '';
@@ -118,7 +120,31 @@ export async function renderEvents(container) {
     });
   }
 
-  function wireAddForm(c) {
+  // 선택된 계좌가 보유 중인 종목을 클릭 한 번으로 고를 수 있게 티커 입력창 아래 목록으로 보여준다.
+  function refreshTickerPills(form, accountId, holdings) {
+    const pillsEl = form.querySelector('#event-ticker-holdings');
+    if (!pillsEl) return;
+    const accountHoldings = holdings.filter((h) => h.accountId === accountId && !h.isCash && h.ticker);
+    if (accountHoldings.length === 0) {
+      pillsEl.innerHTML = `<span class="text-xs text-slate-400">이 계좌의 보유종목이 없어요</span>`;
+      return;
+    }
+    pillsEl.innerHTML = accountHoldings
+      .map(
+        (h) =>
+          `<button type="button" data-ticker="${escapeHtml(h.ticker)}" data-currency="${escapeHtml(h.priceCurrency || 'KRW')}" class="ticker-pill px-2 py-0.5 text-xs rounded-full border bg-white hover:bg-slate-50">${escapeHtml(h.name)}</button>`
+      )
+      .join('');
+    pillsEl.querySelectorAll('.ticker-pill').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        form.ticker.value = btn.dataset.ticker;
+        form.currency.value = btn.dataset.currency;
+        form.ticker.dispatchEvent(new Event('blur'));
+      });
+    });
+  }
+
+  function wireAddForm(c, holdings) {
     const form = c.querySelector('#event-form');
     const tickerInput = c.querySelector('#event-ticker');
     const tickerStatus = c.querySelector('#event-ticker-status');
@@ -132,6 +158,11 @@ export async function renderEvents(container) {
     updateFieldVisibility(form);
     form?.type.addEventListener('change', () => updateFieldVisibility(form));
 
+    if (form) {
+      refreshTickerPills(form, form.accountId.value, holdings);
+      form.accountId.addEventListener('change', () => refreshTickerPills(form, form.accountId.value, holdings));
+    }
+
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const fd = new FormData(form);
@@ -140,6 +171,7 @@ export async function renderEvents(container) {
         type,
         accountId: fd.get('accountId'),
         ticker: fd.get('ticker')?.trim() || null,
+        currency: fd.get('currency') || undefined,
         date: fd.get('date'),
         memo: fd.get('memo'),
       };
@@ -288,9 +320,11 @@ function renderAddForm(accounts) {
         </select>
         <div class="text-xs h-4"></div>
       </div>
-      <div class="flex-1 min-w-[110px]">
+      <div class="flex-1 min-w-[160px]">
         <label class="block text-xs text-slate-500">티커(선택)</label>
         <input name="ticker" id="event-ticker" class="border rounded px-2 py-1 w-full" />
+        <input type="hidden" name="currency" id="event-currency" />
+        <div id="event-ticker-holdings" class="flex flex-wrap gap-1 mt-1"></div>
         <div id="event-ticker-status" class="text-xs h-4"></div>
       </div>
       <div id="field-amount" class="flex-1 min-w-[130px]">

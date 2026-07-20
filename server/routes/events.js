@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as store from '../data/eventsStore.js';
+import { applyEventCashEffect, reapplyEventCashEffect, revertEventCashEffect } from '../services/eventCashSync.js';
 import { asyncHandler } from './asyncHandler.js';
 
 export const router = Router();
@@ -27,15 +28,20 @@ router.get(
 router.post(
   '/',
   asyncHandler(async (req, res) => {
-    res.status(201).json(await store.createEvent(req.body));
+    const event = await store.createEvent(req.body);
+    // 매수는 현금성자산에서 차감, 매도는 가산 — 그 외 유형은 영향 없음.
+    await applyEventCashEffect(event);
+    res.status(201).json(event);
   })
 );
 
 router.put(
   '/:id',
   asyncHandler(async (req, res) => {
+    const before = (await store.listEvents()).find((e) => e.id === req.params.id);
     const updated = await store.updateEvent(req.params.id, req.body);
     if (!updated) return res.status(404).json({ error: '이벤트를 찾을 수 없습니다' });
+    if (before) await reapplyEventCashEffect(before, updated);
     res.json(updated);
   })
 );
@@ -43,8 +49,10 @@ router.put(
 router.delete(
   '/:id',
   asyncHandler(async (req, res) => {
+    const before = (await store.listEvents()).find((e) => e.id === req.params.id);
     const ok = await store.deleteEvent(req.params.id);
     if (!ok) return res.status(404).json({ error: '이벤트를 찾을 수 없습니다' });
+    if (before) await revertEventCashEffect(before);
     res.status(204).end();
   })
 );
