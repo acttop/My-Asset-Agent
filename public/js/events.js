@@ -1,6 +1,6 @@
 import { api } from './api.js';
 import { formatCurrency, formatNumber, escapeHtml } from './format.js';
-import { wireTickerValidation } from './tickerInput.js';
+import { normalizeTicker } from './tickerInput.js';
 import { sortRows, sortableTh, wireSortableHeaders } from './sortableTable.js';
 import { wireThousandsInput, parseCommaNumber } from './numberInput.js';
 
@@ -77,7 +77,10 @@ export async function renderEvents(container) {
         f.type.value = ev.type;
         f.accountId.value = ev.accountId;
         f.ticker.value = ev.ticker || '';
-        refreshTickerPills(f, ev.accountId, holdings);
+        f.currency.value = ev.currency || '';
+        f.querySelector('#event-ticker-search').value = ev.ticker
+          ? `${tickerMeta[ev.ticker]?.name || ev.ticker} (${ev.ticker})`
+          : '';
         f.amount.value = ev.amount;
         f.amount.dispatchEvent(new Event('input')); // 콤마 서식 재적용
         f.quantity.value = ev.quantity ?? '';
@@ -120,56 +123,114 @@ export async function renderEvents(container) {
     });
   }
 
-  // 선택된 계좌가 보유 중인 종목을 드롭다운으로 골라 티커 입력을 채울 수 있게 한다.
-  function refreshTickerPills(form, accountId, holdings) {
-    const selectEl = form.querySelector('#event-ticker-select');
-    if (!selectEl) return;
-    const accountHoldings = holdings.filter((h) => h.accountId === accountId && !h.isCash && h.ticker);
-    selectEl.innerHTML =
-      `<option value="">${accountHoldings.length ? '— 보유종목에서 선택 —' : '이 계좌의 보유종목이 없어요'}</option>` +
-      accountHoldings
+  // 종목 검색창 하나로 "계좌 보유종목 선택"과 "티커 직접 검색"을 겸한다.
+  // 아무것도 입력하지 않은 상태로 포커스하면(또는 계좌를 바꾸면) 선택된 계좌의 보유종목을 목록으로 보여주고,
+  // 무언가 입력하면 전체 티커 검색으로 전환한다. 고르면 "종목명 (티커)"로 표시되고 실제 값은 숨은 필드에 담긴다.
+  function wireTickerSearch(form, holdings) {
+    const input = form.querySelector('#event-ticker-search');
+    const resultsEl = form.querySelector('#event-ticker-results');
+    const statusEl = form.querySelector('#event-ticker-status');
+    let debounceTimer;
+
+    function accountHoldingResults() {
+      return holdings
+        .filter((h) => h.accountId === form.accountId.value && !h.isCash && h.ticker)
+        .map((h) => ({ ticker: h.ticker, name: h.name, currency: h.priceCurrency || 'KRW' }));
+    }
+
+    function renderResults(results) {
+      if (results.length === 0) {
+        resultsEl.classList.add('hidden');
+        resultsEl.innerHTML = '';
+        return;
+      }
+      resultsEl.innerHTML = results
         .map(
-          (h) =>
-            `<option value="${escapeHtml(h.ticker)}" data-currency="${escapeHtml(h.priceCurrency || 'KRW')}">${escapeHtml(h.name)}</option>`
+          (r) => `
+        <div class="ticker-search-item" data-ticker="${escapeHtml(r.ticker)}" data-name="${escapeHtml(r.name)}" data-currency="${escapeHtml(r.currency || '')}">
+          <span>${escapeHtml(r.name)}</span>
+          <span class="text-slate-400">${escapeHtml(r.ticker)}</span>
+        </div>
+      `
         )
         .join('');
-    selectEl.onchange = () => {
-      const opt = selectEl.selectedOptions[0];
-      if (!opt?.value) return;
-      form.ticker.value = opt.value;
-      form.currency.value = opt.dataset.currency || '';
-      form.ticker.dispatchEvent(new Event('blur'));
-      selectEl.value = ''; // 다시 선택할 수 있도록 안내 옵션으로 리셋
-    };
+      resultsEl.classList.remove('hidden');
+
+      resultsEl.querySelectorAll('.ticker-search-item').forEach((item) => {
+        item.addEventListener('mousedown', async (e) => {
+          e.preventDefault(); // blur보다 먼저 실행되도록
+          const ticker = item.dataset.ticker;
+          const name = item.dataset.name;
+          input.value = `${name} (${ticker})`;
+          form.ticker.value = ticker;
+          form.currency.value = item.dataset.currency || '';
+          resultsEl.classList.add('hidden');
+          statusEl.textContent = '조회 중...';
+          statusEl.className = 'text-xs text-slate-400';
+          try {
+            const quote = await api.getPrice(ticker);
+            form.currency.value = quote.currency;
+            statusEl.textContent = `✓ ${new Intl.NumberFormat('ko-KR').format(quote.price)} ${quote.currency}`;
+            statusEl.className = 'text-xs text-emerald-600';
+          } catch {
+            statusEl.textContent = '';
+          }
+        });
+      });
+    }
+
+    input.addEventListener('focus', () => {
+      if (!input.value.trim()) renderResults(accountHoldingResults());
+    });
+
+    input.addEventListener('input', () => {
+      form.ticker.value = '';
+      form.currency.value = '';
+      statusEl.textContent = '';
+      clearTimeout(debounceTimer);
+      const q = input.value.trim();
+      if (!q) {
+        renderResults(accountHoldingResults());
+        return;
+      }
+      debounceTimer = setTimeout(async () => {
+        const results = await api.searchTickers(q).catch(() => []);
+        renderResults(results);
+      }, 200);
+    });
+
+    input.addEventListener('blur', () => {
+      setTimeout(() => resultsEl.classList.add('hidden'), 150);
+    });
+
+    form.accountId.addEventListener('change', () => {
+      if (!input.value.trim()) renderResults(accountHoldingResults());
+    });
   }
 
   function wireAddForm(c, holdings) {
     const form = c.querySelector('#event-form');
-    const tickerInput = c.querySelector('#event-ticker');
-    const tickerStatus = c.querySelector('#event-ticker-status');
-    if (tickerInput && tickerStatus) wireTickerValidation(tickerInput, tickerStatus);
 
     if (form) {
       wireThousandsInput(form.querySelector('#event-amount'));
       wireThousandsInput(form.querySelector('#event-price'));
+      wireTickerSearch(form, holdings);
     }
 
     updateFieldVisibility(form);
     form?.type.addEventListener('change', () => updateFieldVisibility(form));
 
-    if (form) {
-      refreshTickerPills(form, form.accountId.value, holdings);
-      form.accountId.addEventListener('change', () => refreshTickerPills(form, form.accountId.value, holdings));
-    }
-
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const fd = new FormData(form);
       const type = fd.get('type');
+      // 검색 결과를 클릭해서 고르지 않고 직접 입력만 한 경우, 입력창의 원문을 티커로 취급한다.
+      const ticker =
+        fd.get('ticker')?.trim() || normalizeTicker(form.querySelector('#event-ticker-search').value.trim()) || null;
       const data = {
         type,
         accountId: fd.get('accountId'),
-        ticker: fd.get('ticker')?.trim() || null,
+        ticker,
         currency: fd.get('currency') || undefined,
         date: fd.get('date'),
         memo: fd.get('memo'),
@@ -319,10 +380,13 @@ function renderAddForm(accounts) {
         </select>
         <div class="text-xs h-4"></div>
       </div>
-      <div class="flex-1 min-w-[160px]">
-        <label class="block text-xs text-slate-500">티커(선택)</label>
-        <select id="event-ticker-select" class="border rounded px-2 py-1 w-full mb-1 text-sm"></select>
-        <input name="ticker" id="event-ticker" placeholder="티커 직접 입력" class="border rounded px-2 py-1 w-full" />
+      <div class="flex-1 min-w-[180px]">
+        <label class="block text-xs text-slate-500">종목(선택)</label>
+        <div class="relative">
+          <input id="event-ticker-search" placeholder="종목명 또는 티커 검색..." class="border rounded px-2 py-1 w-full" autocomplete="off" />
+          <div id="event-ticker-results" class="ticker-search-results hidden"></div>
+        </div>
+        <input type="hidden" name="ticker" id="event-ticker" />
         <input type="hidden" name="currency" id="event-currency" />
         <div id="event-ticker-status" class="text-xs h-4"></div>
       </div>
