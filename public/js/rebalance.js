@@ -32,7 +32,7 @@ export async function renderRebalance(container) {
     container.innerHTML = `
       <div class="card mb-4">
         <label class="block text-xs text-slate-500 mb-1">🏦 계좌</label>
-        <select id="rebal-account-select" class="border rounded px-2 py-1">
+        <select id="rebal-account-select" class="input">
           ${accounts
             .map((a) => `<option value="${a.id}" ${a.id === selectedAccountId ? 'selected' : ''}>${escapeHtml(a.name)}</option>`)
             .join('')}
@@ -96,11 +96,11 @@ async function renderBody(container) {
       <div class="card mb-4">
         <div class="text-sm text-slate-500 mb-1">🔬 백테스팅 포트폴리오에서 불러오기</div>
         <div class="flex gap-2 items-center mb-4">
-          <select id="rebal-bt-select" class="border rounded px-2 py-1">
+          <select id="rebal-bt-select" class="input flex-1">
             <option value="">-- 포트폴리오 선택 --</option>
             ${backtestPortfolios.map((p) => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}
           </select>
-          <button id="rebal-bt-load" type="button" class="px-2 py-1 text-sm border rounded">불러오기</button>
+          <button id="rebal-bt-load" type="button" class="btn btn-secondary btn-sm">불러오기</button>
         </div>
         <div class="text-xs text-slate-400 mb-4">불러온 후 각 비중을 자유롭게 수정할 수 있습니다.</div>
 
@@ -110,8 +110,8 @@ async function renderBody(container) {
         </div>
         <div id="rebal-target-table-wrap"></div>
         <div class="flex gap-2 mt-2">
-          <button id="rebal-add-row" type="button" class="flex-1 px-2 py-2 text-sm border rounded text-slate-500">＋ 종목 추가</button>
-          <button id="rebal-add-cash-row" type="button" class="flex-1 px-2 py-2 text-sm border rounded text-slate-500">＋ 현금 추가</button>
+          <button id="rebal-add-row" type="button" class="flex-1 btn btn-secondary">＋ 종목 추가</button>
+          <button id="rebal-add-cash-row" type="button" class="flex-1 btn btn-secondary">＋ 현금 추가</button>
         </div>
 
         <div class="flex items-center gap-3 mt-4 px-4 py-3 rounded-full bg-slate-50 text-sm overflow-x-auto">
@@ -119,7 +119,7 @@ async function renderBody(container) {
             <div class="whitespace-nowrap text-slate-500">⚙️ 리밸런싱 기준</div>
             <div class="whitespace-nowrap">
               <span class="text-slate-300 mr-3">|</span><span class="text-slate-500">괴리율 임계값</span>
-              <input id="rebal-threshold" type="number" step="any" value="${cfg.thresholdPct ?? 5}" class="border rounded px-2 py-1 w-14 text-center mx-1" />
+              <input id="rebal-threshold" type="number" step="any" value="${cfg.thresholdPct ?? 5}" class="border rounded-lg px-2 py-1 w-14 text-center mx-1" />
               <span class="text-slate-400">%</span>
             </div>
             <div class="whitespace-nowrap">
@@ -139,10 +139,10 @@ async function renderBody(container) {
         </div>
 
         <div class="flex gap-2 mt-4">
-          <button id="rebal-save" type="button" class="flex-1 bg-blue-600 text-white px-3 py-2 rounded font-medium">저장하기</button>
+          <button id="rebal-save" type="button" class="flex-1 btn btn-primary">저장하기</button>
           ${
             cfg.targets?.length
-              ? `<button id="rebal-clear" type="button" class="px-4 py-2 text-sm border border-red-200 text-red-500 rounded">적용 해제</button>`
+              ? `<button id="rebal-clear" type="button" class="btn btn-danger">적용 해제</button>`
               : ''
           }
         </div>
@@ -252,7 +252,7 @@ function renderTargetRows(body) {
             }</td>
             <td>
               <div class="flex items-center justify-center gap-1">
-                <input data-idx="${originalIdx}" data-field="weight" type="number" step="any" value="${row.targetWeight}" class="border rounded px-2 py-1 w-16 text-right" />
+                <input data-idx="${originalIdx}" data-field="weight" type="number" step="any" value="${row.targetWeight}" class="border rounded-lg px-2 py-1 w-16 text-right" />
                 <span class="text-slate-400 text-xs">%</span>
               </div>
             </td>

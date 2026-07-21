@@ -304,14 +304,14 @@ function renderFilters() {
       ${types
         .map(
           (t) =>
-            `<button data-type="${t}" class="filter-btn px-2 py-1 text-sm rounded border ${
-              filters.type === t ? 'bg-blue-600 text-white' : 'bg-white'
+            `<button data-type="${t}" class="filter-btn btn btn-sm ${
+              filters.type === t ? 'btn-primary' : 'btn-secondary'
             }">${t === '' ? '전체' : TYPE_LABELS[t]}</button>`
         )
         .join('')}
       <div class="flex items-center gap-1 ml-auto">
-        <input id="event-search" placeholder="🔍 메모/티커 검색" value="${escapeHtml(filters.q)}" class="border rounded px-2 py-1 text-sm w-40" />
-        <button id="event-search-clear" class="text-slate-400 text-sm px-1" title="검색어 지우기">✕</button>
+        <input id="event-search" placeholder="🔍 메모/티커 검색" value="${escapeHtml(filters.q)}" class="input w-40" />
+        <button id="event-search-clear" class="icon-btn" title="검색어 지우기">✕</button>
       </div>
     </div>
   `;
@@ -392,7 +392,7 @@ function renderAddForm(accounts) {
     <form id="event-form" class="card flex flex-wrap gap-3 items-end mb-4">
       <div class="flex-1 min-w-[100px]">
         <label class="block text-xs text-slate-500">종류</label>
-        <select name="type" class="border rounded px-2 py-1 w-full">
+        <select name="type" class="input">
           ${Object.entries(TYPE_LABELS)
             .map(([v, l]) => `<option value="${v}">${l}</option>`)
             .join('')}
@@ -401,7 +401,7 @@ function renderAddForm(accounts) {
       </div>
       <div class="flex-1 min-w-[100px]">
         <label class="block text-xs text-slate-500">계좌</label>
-        <select name="accountId" class="border rounded px-2 py-1 w-full">
+        <select name="accountId" class="input">
           ${accounts.map((a) => `<option value="${a.id}">${escapeHtml(a.name)}</option>`).join('')}
         </select>
         <div class="text-xs h-4"></div>
@@ -409,7 +409,7 @@ function renderAddForm(accounts) {
       <div class="flex-1 min-w-[180px]">
         <label class="block text-xs text-slate-500">종목(선택)</label>
         <div class="relative">
-          <input id="event-ticker-search" placeholder="종목명 또는 티커 검색..." class="border rounded px-2 py-1 w-full" autocomplete="off" />
+          <input id="event-ticker-search" placeholder="종목명 또는 티커 검색..." class="input" autocomplete="off" />
           <div id="event-ticker-results" class="ticker-search-results hidden"></div>
         </div>
         <input type="hidden" name="ticker" id="event-ticker" />
@@ -418,36 +418,36 @@ function renderAddForm(accounts) {
       </div>
       <div id="field-amount" class="flex-1 min-w-[130px]">
         <label class="block text-xs text-slate-500">금액</label>
-        <input name="amount" id="event-amount" type="text" inputmode="decimal" placeholder="0" class="border rounded px-2 py-1 w-full text-right" />
+        <input name="amount" id="event-amount" type="text" inputmode="decimal" placeholder="0" class="input text-right" />
         <div class="text-xs h-4"></div>
       </div>
       <div id="field-quantity-price" class="hidden flex-1 min-w-[220px]">
         <div class="flex gap-2">
           <div class="flex-1">
             <label class="block text-xs text-slate-500">수량</label>
-            <input name="quantity" type="number" step="any" class="border rounded px-2 py-1 w-full" />
+            <input name="quantity" type="number" step="any" class="input" />
             <div class="text-xs h-4"></div>
           </div>
           <div class="flex-1">
             <label class="block text-xs text-slate-500">단가</label>
-            <input name="pricePerShare" id="event-price" type="text" inputmode="decimal" placeholder="0" class="border rounded px-2 py-1 w-full text-right" />
+            <input name="pricePerShare" id="event-price" type="text" inputmode="decimal" placeholder="0" class="input text-right" />
             <div class="text-xs h-4"></div>
           </div>
         </div>
       </div>
       <div class="flex-1 min-w-[130px]">
         <label class="block text-xs text-slate-500">일자</label>
-        <input name="date" type="date" value="${new Date().toISOString().slice(0, 10)}" class="border rounded px-2 py-1 w-full" required />
+        <input name="date" type="date" value="${new Date().toISOString().slice(0, 10)}" class="input" required />
         <div class="text-xs h-4"></div>
       </div>
       <div class="flex-1 min-w-[110px]">
         <label class="block text-xs text-slate-500">메모</label>
-        <input name="memo" class="border rounded px-2 py-1 w-full" />
+        <input name="memo" class="input" />
         <div class="text-xs h-4"></div>
       </div>
       <div class="shrink-0">
-        <button class="bg-blue-600 text-white px-3 py-1.5 rounded whitespace-nowrap">${editingId ? '수정 완료' : '＋ 추가'}</button>
-        ${editingId ? `<button type="button" id="event-form-cancel" class="text-slate-400 text-sm px-2">취소</button>` : ''}
+        <button class="btn btn-primary whitespace-nowrap">${editingId ? '수정 완료' : '＋ 추가'}</button>
+        ${editingId ? `<button type="button" id="event-form-cancel" class="btn btn-ghost">취소</button>` : ''}
         <div class="text-xs h-4"></div>
       </div>
     </form>

@@ -38,42 +38,42 @@ export function openAssetModal({ onSaved, prefill } = {}) {
         <div id="asset-security-fields">
           <label class="block text-xs text-slate-500 mb-1">종목 검색</label>
           <div class="relative mb-1">
-            <input id="asset-ticker-search" placeholder="종목명 또는 티커 검색..." class="border rounded px-3 py-2 w-full" autocomplete="off"
+            <input id="asset-ticker-search" placeholder="종목명 또는 티커 검색..." class="input" autocomplete="off"
               value="${prefill?.name ? escapeHtml(`${prefill.name} (${prefill.ticker})`) : ''}" />
             <div id="asset-ticker-results" class="ticker-search-results hidden"></div>
           </div>
           <div id="asset-ticker-selected" class="text-xs mb-3 h-4"></div>
 
           <label class="block text-xs text-slate-500 mb-1" id="asset-quantity-label">수량</label>
-          <input id="asset-quantity" type="text" inputmode="decimal" placeholder="0" class="border rounded px-3 py-2 w-full mb-3 text-right" />
+          <input id="asset-quantity" type="text" inputmode="decimal" placeholder="0" class="input mb-3 text-right" />
 
           <label class="block text-xs text-slate-500 mb-1" id="asset-price-label">매수단가</label>
-          <input id="asset-price" type="text" inputmode="decimal" placeholder="0" class="border rounded px-3 py-2 w-full mb-3 text-right" />
+          <input id="asset-price" type="text" inputmode="decimal" placeholder="0" class="input mb-3 text-right" />
         </div>
 
         <div id="asset-cash-fields" class="hidden">
           <label class="block text-xs text-slate-500 mb-1">자산명</label>
-          <input id="asset-cash-name" placeholder="예: 현금 잔고, ○○은행 정기예금" class="border rounded px-3 py-2 w-full mb-3" />
+          <input id="asset-cash-name" placeholder="예: 현금 잔고, ○○은행 정기예금" class="input mb-3" />
 
           <label class="block text-xs text-slate-500 mb-1">금액</label>
-          <input id="asset-cash-value" type="text" inputmode="decimal" placeholder="0" class="border rounded px-3 py-2 w-full mb-3 text-right" />
+          <input id="asset-cash-value" type="text" inputmode="decimal" placeholder="0" class="input mb-3 text-right" />
         </div>
 
         <label class="block text-xs text-slate-500 mb-1" id="asset-date-label">매수일</label>
-        <input id="asset-date" type="date" value="${new Date().toISOString().slice(0, 10)}" class="border rounded px-3 py-2 w-full mb-3" />
+        <input id="asset-date" type="date" value="${new Date().toISOString().slice(0, 10)}" class="input mb-3" />
 
         <label class="block text-xs text-slate-500 mb-1">계좌</label>
         <div class="flex gap-2 mb-2">
           ${ACCOUNT_PRESETS.map((p) => `<button type="button" data-account="${p}" class="account-preset-btn">${p}</button>`).join('')}
         </div>
-        <input id="asset-account-input" placeholder="직접 입력 (예: 토스계좌, 키움계좌)" class="border rounded px-3 py-2 w-full mb-1"
+        <input id="asset-account-input" placeholder="직접 입력 (예: 토스계좌, 키움계좌)" class="input mb-1"
           value="${escapeHtml(prefill?.accountName || '')}" />
         <div class="text-xs text-slate-400 mb-3">💡 세제혜택 계좌는 위 버튼을, 일반계좌는 직접 입력하세요.</div>
 
         <label class="block text-xs text-slate-500 mb-1">메모 (선택)</label>
-        <textarea id="asset-memo" class="border rounded px-3 py-2 w-full mb-4" rows="2"></textarea>
+        <textarea id="asset-memo" class="input mb-4" rows="2"></textarea>
 
-        <button id="asset-save" type="button" class="bg-blue-600 text-white w-full py-2.5 rounded font-medium">저장</button>
+        <button id="asset-save" type="button" class="btn btn-primary btn-block">저장</button>
         <div id="asset-modal-error" class="text-xs text-red-500 mt-2"></div>
       </div>
     </div>
@@ -285,15 +285,15 @@ export function openSellModal({ accountId, accountName, ticker, name, onSaved })
         <div class="text-xs text-slate-400 mb-3">${escapeHtml(accountName)} · ${escapeHtml(ticker)}</div>
 
         <label class="block text-xs text-slate-500 mb-1">수량</label>
-        <input id="sell-quantity" type="text" inputmode="decimal" placeholder="0" class="border rounded px-3 py-2 w-full mb-3 text-right" />
+        <input id="sell-quantity" type="text" inputmode="decimal" placeholder="0" class="input mb-3 text-right" />
 
         <label class="block text-xs text-slate-500 mb-1">매도단가</label>
-        <input id="sell-price" type="text" inputmode="decimal" placeholder="0" class="border rounded px-3 py-2 w-full mb-3 text-right" />
+        <input id="sell-price" type="text" inputmode="decimal" placeholder="0" class="input mb-3 text-right" />
 
         <label class="block text-xs text-slate-500 mb-1">매도일</label>
-        <input id="sell-date" type="date" value="${new Date().toISOString().slice(0, 10)}" class="border rounded px-3 py-2 w-full mb-4" />
+        <input id="sell-date" type="date" value="${new Date().toISOString().slice(0, 10)}" class="input mb-4" />
 
-        <button id="sell-save" type="button" class="bg-red-600 text-white w-full py-2.5 rounded font-medium">매도 기록</button>
+        <button id="sell-save" type="button" class="btn btn-danger-solid btn-block">매도 기록</button>
         <div id="sell-modal-error" class="text-xs text-red-500 mt-2"></div>
       </div>
     </div>
@@ -352,12 +352,12 @@ export function openCashEditModal({ cashAsset, onSaved }) {
         </div>
 
         <label class="block text-xs text-slate-500 mb-1">자산명</label>
-        <input id="cash-edit-name" value="${escapeHtml(cashAsset.name)}" class="border rounded px-3 py-2 w-full mb-3" />
+        <input id="cash-edit-name" value="${escapeHtml(cashAsset.name)}" class="input mb-3" />
 
         <label class="block text-xs text-slate-500 mb-1">금액</label>
-        <input id="cash-edit-value" type="text" inputmode="decimal" value="${formatForInput(cashAsset.value)}" class="border rounded px-3 py-2 w-full mb-4 text-right" />
+        <input id="cash-edit-value" type="text" inputmode="decimal" value="${formatForInput(cashAsset.value)}" class="input mb-4 text-right" />
 
-        <button id="cash-edit-save" type="button" class="bg-blue-600 text-white w-full py-2.5 rounded font-medium">저장</button>
+        <button id="cash-edit-save" type="button" class="btn btn-primary btn-block">저장</button>
         <div id="cash-edit-error" class="text-xs text-red-500 mt-2"></div>
       </div>
     </div>

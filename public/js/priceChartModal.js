@@ -30,9 +30,9 @@ export function openPriceChartModal({ ticker, name, externalLink }) {
         <div class="flex gap-2 mb-3">
           ${
             isFund
-              ? `<span class="px-3 py-1.5 text-sm rounded border bg-slate-50 text-slate-500">일자별 기준가</span>`
-              : `<button data-view="daily" class="price-view-tab px-3 py-1.5 text-sm rounded border bg-blue-600 text-white">일자별</button>
-          <button data-view="intraday" class="price-view-tab px-3 py-1.5 text-sm rounded border bg-white">시간별</button>`
+              ? `<span class="px-3 py-1.5 text-sm rounded-lg border bg-slate-50 text-slate-500">일자별 기준가</span>`
+              : `<button data-view="daily" class="price-view-tab btn btn-sm btn-primary">일자별</button>
+          <button data-view="intraday" class="price-view-tab btn btn-sm btn-secondary">시간별</button>`
           }
         </div>
         <div id="price-chart-body"><p class="text-slate-500">불러오는 중...</p></div>
@@ -45,9 +45,8 @@ export function openPriceChartModal({ ticker, name, externalLink }) {
     btn.addEventListener('click', () => {
       currentView = btn.dataset.view;
       root.querySelectorAll('.price-view-tab').forEach((b) => {
-        b.classList.toggle('bg-blue-600', b === btn);
-        b.classList.toggle('text-white', b === btn);
-        b.classList.toggle('bg-white', b !== btn);
+        b.classList.toggle('btn-primary', b === btn);
+        b.classList.toggle('btn-secondary', b !== btn);
       });
       loadChart(ticker);
     });

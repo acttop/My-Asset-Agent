@@ -183,8 +183,8 @@ function renderGranularityTabs(container) {
   tabsEl.innerHTML = Object.entries(GRANULARITY_LABELS)
     .map(
       ([key, label]) =>
-        `<button data-granularity="${key}" class="granularity-tab px-2 py-0.5 text-xs rounded-full ${
-          cumulativeGranularity === key ? 'bg-blue-600 text-white' : 'bg-white border'
+        `<button data-granularity="${key}" class="granularity-tab btn btn-sm ${
+          cumulativeGranularity === key ? 'btn-primary' : 'btn-secondary'
         }">${label}</button>`
     )
     .join('');

@@ -112,8 +112,8 @@ export async function renderGuide(container) {
     <div class="mb-4 flex gap-2 flex-wrap">
       ${SECTIONS.map(
         ([key, label]) =>
-          `<button data-section="${key}" class="guide-section-tab px-3 py-1.5 text-sm rounded-full ${
-            activeSection === key ? 'bg-blue-600 text-white' : 'bg-white border'
+          `<button data-section="${key}" class="guide-section-tab btn btn-sm ${
+            activeSection === key ? 'btn-primary' : 'btn-secondary'
           }">${label}</button>`
       ).join('')}
     </div>
@@ -167,7 +167,7 @@ function renderExternalEmbed(body, { url, label, title, description }) {
         ${escapeHtml(description)} 화면 안에서 바로 볼 수 있어요. 이 앱이 제공하는 정보가 아니라 외부 제공 콘텐츠예요.
       </p>
       <a href="${url}" target="_blank" rel="noopener noreferrer"
-        class="text-sm text-blue-600 border border-blue-200 rounded px-3 py-1.5 whitespace-nowrap">새 창에서 열기 ↗</a>
+        class="btn btn-sm btn-secondary whitespace-nowrap">새 창에서 열기 ↗</a>
     </div>
     <div class="card p-0 overflow-hidden">
       <iframe src="${url}" title="${escapeHtml(title)}" class="w-full" style="height: 75vh; border: 0;"
@@ -285,7 +285,7 @@ const GLOSSARY = [
 function renderGlossary(body) {
   body.innerHTML = `
     <div class="card mb-4">
-      <input id="glossary-search" placeholder="용어 검색 (예: CAGR, 리밸런싱)" class="border rounded px-3 py-2 w-full"
+      <input id="glossary-search" placeholder="용어 검색 (예: CAGR, 리밸런싱)" class="input"
         value="${escapeHtml(glossaryQuery)}" />
     </div>
     <div id="glossary-results" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>

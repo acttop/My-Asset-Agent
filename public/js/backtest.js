@@ -74,27 +74,27 @@ export async function renderBacktest(container) {
         <div class="text-sm text-slate-500 mb-1">🚀 추천 포트폴리오</div>
         <div class="text-xs text-slate-400 mb-3">처음이라면 프리셋으로 시작해보세요</div>
         <div class="flex flex-wrap gap-2">
-          ${PRESETS.map((p, i) => `<button data-preset="${i}" class="bt-preset px-3 py-1.5 text-sm rounded border bg-white">${p.icon} ${p.name}</button>`).join('')}
+          ${PRESETS.map((p, i) => `<button data-preset="${i}" class="bt-preset btn btn-sm btn-secondary">${p.icon} ${p.name}</button>`).join('')}
         </div>
       </div>
 
       <div class="card mb-4">
         <div class="flex justify-between items-center mb-3">
           <div class="text-sm text-slate-500">📋 포트폴리오 구성 ${state.editingPortfolioId ? '<span class="text-blue-600 text-xs">(수정 중)</span>' : ''}</div>
-          <button id="bt-reset" type="button" class="text-xs text-slate-400">전체 초기화</button>
+          <button id="bt-reset" type="button" class="btn btn-ghost btn-sm">전체 초기화</button>
         </div>
 
         <div class="flex flex-wrap items-center gap-2 mb-3 pb-3 border-b border-slate-100">
-          <select id="bt-import-account" class="border rounded px-2 py-1 text-sm">
+          <select id="bt-import-account" class="border rounded-lg px-2 py-1.5 text-sm">
             <option value="">전체 계좌</option>
             ${accounts.map((a) => `<option value="${a.id}">${escapeHtml(a.name)}</option>`).join('')}
           </select>
-          <button id="bt-import-holdings" type="button" class="px-2 py-1 text-sm border rounded bg-emerald-50 text-emerald-700 border-emerald-200">📥 내 보유종목 불러오기</button>
+          <button id="bt-import-holdings" type="button" class="btn btn-sm btn-success">📥 내 보유종목 불러오기</button>
           <span class="text-xs text-slate-400">현재 보유 비중을 그대로 불러와요. 현금성 자산은 제외돼요. (투자 자문이 아닌 참고용 정보예요)</span>
         </div>
 
         <div class="relative mb-3">
-          <input id="bt-ticker-search" placeholder="종목명 또는 티커 검색 (예: 삼성전자, AAPL)" class="border rounded px-3 py-2 w-full" autocomplete="off" />
+          <input id="bt-ticker-search" placeholder="종목명 또는 티커 검색 (예: 삼성전자, AAPL)" class="input" autocomplete="off" />
           <div id="bt-ticker-results" class="ticker-search-results hidden"></div>
         </div>
 
@@ -110,7 +110,7 @@ export async function renderBacktest(container) {
           </ul>
         </div>
 
-        <input id="bt-name" placeholder="포트폴리오 이름 (저장 시 필요)" value="${escapeHtml(state.portfolioName)}" class="border rounded px-2 py-1 mb-3 w-full sm:w-64" />
+        <input id="bt-name" placeholder="포트폴리오 이름 (저장 시 필요)" value="${escapeHtml(state.portfolioName)}" class="input mb-3" />
 
         <div id="bt-rows" class="space-y-2 mb-1"></div>
         <div id="bt-empty" class="text-center text-slate-400 text-sm py-4 hidden">종목을 추가하거나 위 프리셋을 선택해보세요</div>
@@ -126,8 +126,8 @@ export async function renderBacktest(container) {
       </div>
 
       <div class="flex gap-2 mb-4">
-        <button id="bt-save-portfolio" type="button" class="flex-1 border rounded px-3 py-2.5 text-sm bg-white">⬆ ${state.editingPortfolioId ? '변경사항 저장' : '포트폴리오 저장'}</button>
-        <button id="bt-saved-toggle" type="button" class="flex-1 border rounded px-3 py-2.5 text-sm bg-white">☰ 저장 목록 ${portfolios.length}</button>
+        <button id="bt-save-portfolio" type="button" class="flex-1 btn btn-secondary">⬆ ${state.editingPortfolioId ? '변경사항 저장' : '포트폴리오 저장'}</button>
+        <button id="bt-saved-toggle" type="button" class="flex-1 btn btn-secondary">☰ 저장 목록 ${portfolios.length}</button>
       </div>
       <div id="bt-saved-list" class="card mb-4 hidden">
         ${
@@ -160,18 +160,18 @@ export async function renderBacktest(container) {
 
         <div class="mb-3">
           <label class="block text-xs text-slate-500 mb-1">초기 투자금</label>
-          <div class="flex items-center gap-2 border rounded px-3 py-2 mb-2">
+          <div class="input-wrap mb-2">
             <input id="bt-initial" type="text" inputmode="decimal" value="${formatForInput(state.initialAmount)}" class="flex-1 text-xl font-bold outline-none text-right" />
             <span class="text-slate-400 text-sm">만원</span>
           </div>
           <div class="flex gap-2">
-            ${[500, 1000, 3000, 5000].map((v) => `<button data-amount="${v}" class="bt-amount-preset px-2 py-1 text-xs border rounded">${v}만</button>`).join('')}
+            ${[500, 1000, 3000, 5000].map((v) => `<button data-amount="${v}" class="bt-amount-preset btn btn-sm btn-secondary">${v}만</button>`).join('')}
           </div>
         </div>
 
         <div class="mb-3">
           <label class="block text-xs text-slate-500 mb-1">월 추가 납입 (없으면 0)</label>
-          <div class="flex items-center gap-2 border rounded px-3 py-2">
+          <div class="input-wrap">
             <input id="bt-monthly" type="text" inputmode="decimal" value="${formatForInput(state.monthlyContribution)}" class="flex-1 outline-none text-right" />
             <span class="text-slate-400 text-sm">만원/월</span>
           </div>
@@ -179,7 +179,7 @@ export async function renderBacktest(container) {
 
         <div class="mb-3">
           <label class="block text-xs text-slate-500 mb-1">연 추가 납입 (없으면 0, 매년 1회)</label>
-          <div class="flex items-center gap-2 border rounded px-3 py-2">
+          <div class="input-wrap">
             <input id="bt-yearly" type="text" inputmode="decimal" value="${formatForInput(state.yearlyContribution)}" class="flex-1 outline-none text-right" />
             <span class="text-slate-400 text-sm">만원/년</span>
           </div>
@@ -189,7 +189,7 @@ export async function renderBacktest(container) {
         <div class="mb-3">
           <label class="block text-xs text-slate-500 mb-1">투자 기간</label>
           <div class="flex gap-2 flex-wrap">
-            ${PERIOD_YEARS.map((y) => `<button data-years="${y}" class="bt-period-btn px-3 py-1.5 text-sm rounded border ${state.periodYears === y ? 'bg-blue-600 text-white' : 'bg-white'}">${y}년</button>`).join('')}
+            ${PERIOD_YEARS.map((y) => `<button data-years="${y}" class="bt-period-btn btn btn-sm ${state.periodYears === y ? 'btn-primary' : 'btn-secondary'}">${y}년</button>`).join('')}
           </div>
         </div>
 
@@ -197,7 +197,7 @@ export async function renderBacktest(container) {
           <label class="block text-xs text-slate-500 mb-1">리밸런싱 주기</label>
           <div class="flex gap-2 flex-wrap">
             ${[['none', '없음'], ['monthly', '월'], ['quarterly', '분기'], ['semiannual', '반기'], ['yearly', '연']]
-              .map(([v, l]) => `<button data-rebal="${v}" class="bt-rebal-btn px-3 py-1.5 text-sm rounded border ${state.rebalancePeriod === v ? 'bg-orange-500 text-white' : 'bg-white'}">${l}</button>`)
+              .map(([v, l]) => `<button data-rebal="${v}" class="bt-rebal-btn btn btn-sm ${state.rebalancePeriod === v ? 'btn-primary' : 'btn-secondary'}">${l}</button>`)
               .join('')}
           </div>
         </div>
@@ -205,8 +205,8 @@ export async function renderBacktest(container) {
         <div class="mb-3">
           <label class="block text-xs text-slate-500 mb-1">배당 재투자</label>
           <div class="flex gap-2">
-            <button data-reinvest="true" class="bt-reinvest-btn px-3 py-1.5 text-sm rounded border ${state.reinvestDividends ? 'bg-orange-500 text-white' : 'bg-white'}">재투자 ON</button>
-            <button data-reinvest="false" class="bt-reinvest-btn px-3 py-1.5 text-sm rounded border ${!state.reinvestDividends ? 'bg-orange-500 text-white' : 'bg-white'}">배당 수령 (OFF)</button>
+            <button data-reinvest="true" class="bt-reinvest-btn btn btn-sm ${state.reinvestDividends ? 'btn-primary' : 'btn-secondary'}">재투자 ON</button>
+            <button data-reinvest="false" class="bt-reinvest-btn btn btn-sm ${!state.reinvestDividends ? 'btn-primary' : 'btn-secondary'}">배당 수령 (OFF)</button>
           </div>
           <div class="text-xs text-slate-400 mt-1">OFF는 배당을 반영하지 않은 가격 수익률만 계산합니다. 국내(.KS/.KQ) 종목은 배당 재투자 데이터를 지원하지 않아 항상 가격 수익률로 계산돼요.</div>
         </div>
@@ -217,7 +217,7 @@ export async function renderBacktest(container) {
             ${Object.entries(BENCHMARKS)
               .map(
                 ([key, b]) =>
-                  `<button data-benchmark="${key}" class="bt-benchmark-btn px-3 py-1.5 text-sm rounded border ${state.benchmark === key ? 'bg-orange-500 text-white' : 'bg-white'}">${key === 'none' ? '비교 안함' : b.label}</button>`
+                  `<button data-benchmark="${key}" class="bt-benchmark-btn btn btn-sm ${state.benchmark === key ? 'btn-primary' : 'btn-secondary'}">${key === 'none' ? '비교 안함' : b.label}</button>`
               )
               .join('')}
           </div>
@@ -225,7 +225,7 @@ export async function renderBacktest(container) {
 
         <div class="mb-1">
           <label class="block text-xs text-slate-500 mb-1">내 포트폴리오와 비교</label>
-          <select id="bt-compare-select" class="border rounded px-2 py-1">
+          <select id="bt-compare-select" class="input">
             <option value="">저장된 포트폴리오와 비교 안함</option>
             ${portfolios.map((p) => `<option value="${p.id}" ${state.comparePortfolioId === p.id ? 'selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
           </select>
@@ -234,7 +234,7 @@ export async function renderBacktest(container) {
       </div>
       </div>
 
-      <button id="bt-run" type="button" class="bg-blue-600 text-white px-4 py-2.5 rounded font-medium mb-4 w-full">📊 백테스팅 시작</button>
+      <button id="bt-run" type="button" class="btn btn-primary btn-block mb-4">📊 백테스팅 시작</button>
 
       <div id="bt-result"></div>
     `;
@@ -257,7 +257,7 @@ function renderRowItem(row, i, color) {
         ${subtitleParts.length ? `<div class="text-xs text-slate-400 truncate">${escapeHtml(subtitleParts.join(' · '))}</div>` : ''}
       </div>
       <div class="flex items-center gap-1 shrink-0">
-        <input data-idx="${i}" data-field="weight" type="number" step="any" value="${row.weight}" class="border rounded px-2 py-1 w-16 text-right text-sm" />
+        <input data-idx="${i}" data-field="weight" type="number" step="any" value="${row.weight}" class="border rounded-lg px-2 py-1 w-16 text-right text-sm" />
         <span class="text-slate-400 text-xs">%</span>
       </div>
       <button data-idx="${i}" class="bt-remove-row w-6 h-6 rounded-full bg-slate-100 text-slate-400 text-xs hover:bg-slate-200 shrink-0">✕</button>
@@ -557,19 +557,19 @@ function wireEvents(container, portfolios, accounts, tickerMeta) {
   container.querySelectorAll('.bt-rebal-btn').forEach((btn) =>
     btn.addEventListener('click', () => {
       state.rebalancePeriod = btn.dataset.rebal;
-      container.querySelectorAll('.bt-rebal-btn').forEach((b) => toggleActive(b, b === btn, 'bg-orange-500'));
+      container.querySelectorAll('.bt-rebal-btn').forEach((b) => toggleActive(b, b === btn));
     })
   );
   container.querySelectorAll('.bt-reinvest-btn').forEach((btn) =>
     btn.addEventListener('click', () => {
       state.reinvestDividends = btn.dataset.reinvest === 'true';
-      container.querySelectorAll('.bt-reinvest-btn').forEach((b) => toggleActive(b, b === btn, 'bg-orange-500'));
+      container.querySelectorAll('.bt-reinvest-btn').forEach((b) => toggleActive(b, b === btn));
     })
   );
   container.querySelectorAll('.bt-benchmark-btn').forEach((btn) =>
     btn.addEventListener('click', () => {
       state.benchmark = btn.dataset.benchmark;
-      container.querySelectorAll('.bt-benchmark-btn').forEach((b) => toggleActive(b, b === btn, 'bg-orange-500'));
+      container.querySelectorAll('.bt-benchmark-btn').forEach((b) => toggleActive(b, b === btn));
     })
   );
   container.querySelector('#bt-compare-select').addEventListener('change', (e) => {
@@ -579,10 +579,9 @@ function wireEvents(container, portfolios, accounts, tickerMeta) {
   container.querySelector('#bt-run').addEventListener('click', () => runBacktest(container, portfolios));
 }
 
-function toggleActive(btn, isActive, activeClass = 'bg-blue-600') {
-  btn.classList.toggle(activeClass, isActive);
-  btn.classList.toggle('text-white', isActive);
-  btn.classList.toggle('bg-white', !isActive);
+function toggleActive(btn, isActive) {
+  btn.classList.toggle('btn-primary', isActive);
+  btn.classList.toggle('btn-secondary', !isActive);
 }
 
 async function runBacktest(container, portfolios) {

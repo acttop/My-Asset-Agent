@@ -30,7 +30,7 @@ export async function renderHoldings(container) {
     container.innerHTML = `
       <div class="mb-4 flex justify-between items-center flex-wrap gap-2">
         ${renderAccountTabs(accounts, selectedAccountId)}
-        <button id="open-asset-modal" class="bg-blue-600 text-white px-4 py-2 rounded font-medium">＋ 자산 추가</button>
+        <button id="open-asset-modal" class="btn btn-primary">＋ 자산 추가</button>
       </div>
       <div id="holdings-body"></div>
     `;
@@ -116,7 +116,7 @@ function renderEmpty(accounts) {
       📭 보유 종목이 없어요. 위 버튼으로 첫 종목을 추가해보세요.
       ${
         account
-          ? `<div class="mt-3"><button id="delete-empty-account" class="text-red-500 text-xs border border-red-200 rounded px-3 py-1.5">🗑️ '${escapeHtml(account.name)}' 계좌 삭제</button></div>`
+          ? `<div class="mt-3"><button id="delete-empty-account" class="btn btn-danger btn-sm">🗑️ '${escapeHtml(account.name)}' 계좌 삭제</button></div>`
           : ''
       }
     </div>
